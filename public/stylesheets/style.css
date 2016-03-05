@@ -1,0 +1,176 @@
+body {
+  padding: 30px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #20D7FF;
+}
+
+div.item{
+  display:block;
+}
+
+body {
+  background-color: #021014;
+  color: #8d8a6d
+}
+
+/* Style the ul navigation into a nav bar
+http://www.w3schools.com/css/css_navbar.asp
+*/
+
+ul.nav_list {
+  list-style-type: none;  /*removes bullets */
+  margin:0;
+  padding: 10px 0px 20px 0px;
+}
+
+li.nav_link  {
+  float:left;
+}
+
+li.nav_link a {
+  text-decoration: none;  /*remove underlines */
+  text-align: center;
+  padding:10px;
+  background-color: green;
+  border-right: 1px solid #000  /* todo should also exclude last item */
+}
+
+li.nav_link a:hover {
+  background-color: darkgreen
+}
+
+/* Styles for add new task form */
+
+/*Styles for the Mark All Done section */
+
+.addtask {
+  margin: 10px 0 10px 0;
+}
+
+#addtask_input {
+  margin: 10px 0 10px 0;
+  display: inline;
+  width: 300px
+}
+
+#addtask_button {
+  padding: 10px;
+  margin :10px;
+  background-color: purple;
+  color: white;
+  border: 0;
+
+}
+
+/*Styles for the Mark All Done section */
+
+.all_done {
+  margin: 10px 0 10px 0;
+}
+
+#all_done_text {
+  color: white;
+  display: inline
+}
+
+
+#all_done_form {
+  margin: 10px;
+  display: inline
+}
+
+#all_done_button {
+  padding: 10px;
+  background-color: purple;
+  color: white;
+  border: 0;
+
+}
+
+/* Styles for the list of todo items / tasks
+Style buttons and lay them out as inline elements */
+
+button.delete_task {
+  background-color: red;
+  color: white;
+  border : 0px;
+  float:right;
+}
+
+.done_form {
+  float:left;
+  display: inline;
+  line-height: 25px;
+}
+
+
+.done_button {
+  border : none;
+  background-color: #8d8a6d
+}
+
+
+.task_number {
+  display: inline;
+  color: #bebcd3;
+  padding:10px;
+  line-height: 25px;
+}
+
+
+.task_name {
+  display: inline;
+  padding:10px;
+  margin:10px;
+  line-height: 25px;
+}
+
+
+div.task_name > span{
+  color: #05ffe5;
+  padding:10px;
+  line-height: 25px;
+}
+
+
+div.delete_button{
+  display: inline;
+  line-height: 25px;
+  margin:10px
+}
+
+/*Completed Tasks */
+.completed_list {
+  padding:10px;
+}
+
+/* Styles for login screen */
+
+.login {
+  margin : 10px
+}
+
+label.auth_label {
+  display: inline-block;
+  width : 70px
+}
+
+input.auth_input {
+  margin: 5px
+}
+
+input.auth_button {
+  background-color: purple;
+  color : white;
+  padding: 8px;
+  margin: 5px 0 5px 0;
+  border : 0
+}
+
+p.auth_message {
+  color:orangered;
+}
+

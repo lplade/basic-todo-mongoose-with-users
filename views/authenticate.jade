@@ -1,0 +1,38 @@
+extends layout
+
+block content
+
+    //Form for login
+
+    .login.signin
+        h2 Please log in...
+
+        //This is where authentication error messages wil be displayed
+        if loginMessage
+            p.auth_message=loginMessage
+
+        form.auth_form(action='/login' method='post')
+            label.auth_label username
+            input.auth_input(name='username' type='text' required)
+            br
+            label.auth_label password
+            input.auth_input(name='password' type='password' required)
+            br
+            input.auth_button(name='login_button' type='submit' value='Login')
+
+    //Form to create account
+
+    .login.create_account
+        h2 Or create an account
+
+        if createAcctMessage
+            p.auth_message=createAcctMessage
+
+        form.auth_form(action='/signup' method='post')
+            label.auth_label username
+            input.auth_input(type='text' name='username' required)
+            br
+            label.auth_label password
+            input.auth_input(type='password' name='password' required)
+            br
+            input.auth_button(type='submit' name='signup' value='Sign up')

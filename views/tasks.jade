@@ -1,0 +1,38 @@
+extends layout
+
+block content
+
+    div.addtask
+        form#addtask_form(action='tasks/addtask', method="post")
+            input#addtask_input(type="text", name="task_name", placeholder="add new task" required)
+            input#addtask_button(type="submit", value="add")
+
+    if (tasks.length === 0)
+        p No tasks.
+
+    each task, index in tasks
+        div.item(id=task._id)
+            //a done button, the task name, a delete button
+            .done_form
+                form(action='/tasks/#{task._id}', method='post')
+                    input(type='hidden', value=task._id, name=_id)
+                    input(type='hidden', value='true', name="completed")
+                    input.done_button(type='submit', class='task-done', value='done')
+            .task_number
+                span.number=index+1
+            .task_name
+                span.name=task.name
+            .delete_button
+                button.delete_task(task_id=task._id) Delete
+
+
+    div.all_done
+        span#all_done_text Mark all as done...
+        form#all_done_form(action='tasks/alldone' method='post')
+            input(type='hidden', value='true', name='all_done')
+            input.button#all_done_button(type='submit', value='All done!')
+
+
+    //ul.nav_list
+    //    li.nav_link
+    //        a(href="/logout") Log out
