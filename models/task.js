@@ -2,14 +2,20 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-//var User = require('./user');
 
 var taskSchema = new Schema ({
 
-  _creator : { type : ObjectId, ref : 'UserSchema'  },
   name: String,
-  completed : Boolean
+  completed : Boolean,
+
+  /* A reference to the User object who created this task
+   It is possible to populate this field with all of the
+   details of the User object: look up the populate() function */
+
+  _creator : { type : ObjectId, ref : 'User' }
+
 });
+
 
 var Task = mongoose.model('Task', taskSchema);
 

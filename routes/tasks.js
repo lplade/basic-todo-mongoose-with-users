@@ -1,11 +1,9 @@
 var express = require('express');
 var router = express.Router();
-//var isAuth = require('')   //module exports isLoggedIn?
 
-var ObjectId = require('mongoose').Schema.Types.ObjectId;
+var Task = require('./../models/task.js');  //Specify models used
+var User = require('./../models/user.js');
 
-var Task = require('./../models/task.js');  //Specify model used
-var User = require('./../models/user.js')
 
 /** Create a middleware function. Check if user is logged in
 or not. If so, continue, if not redirect back to home page. */
@@ -19,29 +17,26 @@ function isLoggedIn(req, res, next){
   res.redirect('/');
 }
 
-//Oblige all task routes to use this middleware function and check if user is logged in.
+/** Oblige all routes in this file to use the isLoggedIn middleware. */
 router.use(isLoggedIn);
 
 
 /*** All incomplete tasks
- * Creates a list of all tasks which are not completed FOR THIS USER*/
+ * Creates a list of all tasks which are not completed for THIS user*/
 router.get('/', function(req, res, next){
 
-  var incomplete = req.user.tasks.filter(function(task){
-    return !task.completed;
+  Task.find( { _creator : req.user._id , completed : false} , function(err, incomplete) {
+    res.render('tasks', {
+      title: 'Tasks to do',
+      username: req.user.auth.username.toUpperCase(),
+      tasks: incomplete || []
+    });
   });
-
-  console.log(incomplete);
-  res.render('tasks', {
-    title : 'Tasks to do',
-    username : req.user.auth.username.toUpperCase(),
-    tasks : incomplete || [] });
-
 });
 
 
-/***
- * Adds a new task to the database then redirects to task list */
+/*** Adds a new task.
+ * Creates a new Task object, saves it to the database, then redirects to task list */
 router.post('/addtask', function(req, res, next) {
 
   if (!req.body || !req.body.task_name) {
@@ -50,18 +45,16 @@ router.post('/addtask', function(req, res, next) {
 
   //Create a new task by instantiating a Task object...
   var newTask = Task( {
-    _creator : new ObjectId(req.user._id),
+    _creator : req.user._id,
     name : req.body.task_name,
     completed: false } );
 
-  //Add it to this user's list of tasks...
-  req.user.tasks.push(newTask);
-
   //Then call the save method to save it to the database. Note callback.
-  req.user.save(function(err){
+  newTask.save(function(err){
     if (err) {
       return next(err);
-    } else {
+    }
+    else {
       res.redirect('/tasks');
     }
   });
@@ -71,55 +64,57 @@ router.post('/addtask', function(req, res, next) {
 /**  Get all of the completed tasks for this user. */
 router.get('/completed', function(req, res, next){
 
-  var complete = req.user.tasks.filter(function(task){
-    return task.completed;
+  Task.find({ '_creator' : req.user._id, completed : true}, function(err, completed) {
+    if (err) {
+      return next(err);
+    }
+
+    res.render('tasks_completed', {
+      title: 'Completed',
+      username: req.user.auth.username.toUpperCase(),
+      tasks: completed || []
+    });
   });
-
-  res.render('tasks_completed', {
-    title:'Completed',
-    username : req.user.auth.username.toUpperCase(),
-    tasks: complete || [] });
-
 });
 
 
 /**Set all tasks to completed, display empty tasklist */
-router.post('/alldone', function(req, res, next){
+router.post('/alldone', function(req, res, next) {
 
-  req.user.tasks.forEach(function(task){
-    task.completed = true;
-  });
+  Task.update({  '_creator' : req.user._id, 'completed' : false}, { $set: { 'completed' : true }}, { 'multi' : true }, function (err, result) {
 
-  req.user.save(function(err) {
     if (err) {
       return next(err);
     }
-    res.redirect('/tasks');
-  })
 
+    req.user.save(function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.redirect('/tasks');
+    })
+  });
 });
 
 
 /**This gets called for any routes with url parameters e.g. DELETE and POST tasks/taskID
- This is really helpful because it provides a task object (_id, name, completed) as req.task
+ This is really helpful because it provides a task object id as req.taskid
  Order matters here. This is beneath the other routes, but above routes which need the parameter.
- Otherwise it would be called for /tasks/completed which we don't want to do '/completed' isn't an id.
+ Otherwise it would be called for /tasks/completed which we don't want to do, since '/completed' isn't an id.
  */
 router.param('task_id', function(req, res, next, taskId) {
 
   console.log("params being extracted from URL for " + taskId);
 
   req.taskid = taskId;
+  return next();
 
-  User.find( { 'task._id' : taskId} , function (err, task) {
-    if (err) {
-      return next(err);
-    }
-    console.log('The task found is  ' + task);
-    req.task = task;
-    return next();
+  /* Alternatively, could fetch a task from the database
+  and attach it to the req object. In the complete task method,
+  would set req.task.completed = true and
+  call the req.task.save method to update the db.
+   */
 
-  });
 });
 
 
@@ -131,20 +126,13 @@ router.post('/:task_id', function(req, res, next) {
     return next(new Error('body missing parameter?'))
   }
 
-  console.log("complete task " + req.taskid);
-
-  var taskToMarkComplete = req.user.tasks.find(function(task) {
-    return task._id == req.taskid
+  Task.findByIdAndUpdate(req.taskid, {$set : {completed : true }}, function(err) {
+     if (err) {
+        return next(err);
+     }
+     res.redirect('/tasks')
   });
 
-  taskToMarkComplete.completed = true;
-
-  req.user.save(function(err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect('/tasks');
-  })
 });
 
 
@@ -152,9 +140,7 @@ router.post('/:task_id', function(req, res, next) {
  Delete task with particular ID from database. This is called with AJAX */
 router.delete('/:task_id', function(req, res, next) {
 
-  req.user.tasks.id(req.taskid).remove();
-
-  req.user.save(function(err) {
+  Task.remove({ '_id' : req.taskid },  function(err) {
     if (err) {
       return next(error);
     }

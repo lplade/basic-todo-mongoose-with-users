@@ -1,15 +1,12 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var Schema = mongoose.Schema;
-var TaskSchema = require('./task').schema;
 
 var userSchema = new Schema({
   auth : {
     username: String,
     password: String
-  },
-  tasks : [ TaskSchema ]
-
+  }
 });
 
 
