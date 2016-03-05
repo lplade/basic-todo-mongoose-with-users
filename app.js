@@ -8,6 +8,8 @@ var mongoose = require('mongoose');
 var flash = require('connect-flash');
 var session = require('express-session');
 var passport = require('passport');
+//Set up session store, so that users stay logged in even if app is restarted
+var MongoDBStore = require('connect-mongodb-session')(session)
 
 var index = require('./routes/index')
 var tasks = require('./routes/tasks');
@@ -27,11 +29,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//DB connection string.
+var userdb_url ="mongodb://localhost:27017/todo"
+var user_sessions_url ="mongodb://localhost:27017/todo_sessions"
+
+
 //Set up sessions and passport
 app.use(session({
   secret : "replace with long random number",
   resave : false,
-  saveUninitialized : false
+  saveUninitialized : false,
+  store: new MongoDBStore({url : user_sessions_url})
 }));
 
 require('./config/passport')(passport);
@@ -40,10 +48,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-//DB connection string.
-var url ="mongodb://localhost:27017/todo"
 
-var db = mongoose.connect(url);
+var db = mongoose.connect(userdb_url);
 
 mongoose.connection.on('error', function(err) {
   console.log('Error connecting to MongoDB via Mongoose ' + err)
